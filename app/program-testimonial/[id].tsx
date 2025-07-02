@@ -1,0 +1,402 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Image,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ArrowLeft, Star, Camera } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, useLocalSearchParams } from 'expo-router';
+
+export default function ProgramTestimonialScreen() {
+  const { id } = useLocalSearchParams();
+  const [rating, setRating] = useState(0);
+  const [testimonial, setTestimonial] = useState('');
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const programData = {
+    title: 'Bootcamp Minceur',
+    image: 'https://images.pexels.com/photos/1552106/pexels-photo-1552106.jpeg?auto=compress&cs=tinysrgb&w=400',
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const handleRating = (stars: number) => {
+    setRating(stars);
+  };
+
+  const handleAddPhoto = () => {
+    // Simulate photo selection
+    const newPhoto = 'https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=400';
+    setSelectedImages(prev => [...prev, newPhoto]);
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (rating === 0) {
+      alert('Veuillez donner une note');
+      return;
+    }
+
+    if (!testimonial.trim()) {
+      alert('Veuillez écrire votre témoignage');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    // Simulate submission
+    setTimeout(() => {
+      setIsSubmitting(false);
+      router.push('/testimonial-success');
+    }, 1500);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <ArrowLeft size={24} color="#111827" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Ajouter un témoignage</Text>
+        <View style={styles.headerRight} />
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
+        {/* Program Info */}
+        <View style={styles.programSection}>
+          <Image source={{ uri: programData.image }} style={styles.programImage} />
+          <Text style={styles.programTitle}>{programData.title}</Text>
+          <Text style={styles.programSubtitle}>Partagez votre expérience avec ce programme</Text>
+        </View>
+
+        {/* Rating */}
+        <View style={styles.ratingSection}>
+          <Text style={styles.sectionTitle}>Votre note</Text>
+          <Text style={styles.sectionSubtitle}>Comment évaluez-vous ce programme ?</Text>
+          <View style={styles.starsContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity
+                key={star}
+                onPress={() => handleRating(star)}
+                style={styles.starButton}
+              >
+                <Star
+                  size={40}
+                  color={star <= rating ? "#F59E0B" : "#E5E7EB"}
+                  fill={star <= rating ? "#F59E0B" : "transparent"}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+          {rating > 0 && (
+            <Text style={styles.ratingText}>
+              {rating === 1 && "Décevant"}
+              {rating === 2 && "Moyen"}
+              {rating === 3 && "Bien"}
+              {rating === 4 && "Très bien"}
+              {rating === 5 && "Excellent"}
+            </Text>
+          )}
+        </View>
+
+        {/* Testimonial */}
+        <View style={styles.testimonialSection}>
+          <Text style={styles.sectionTitle}>Votre témoignage</Text>
+          <Text style={styles.sectionSubtitle}>
+            Décrivez votre expérience, vos résultats et ce que vous avez aimé
+          </Text>
+          <TextInput
+            style={styles.testimonialInput}
+            placeholder="Partagez votre expérience avec ce programme..."
+            value={testimonial}
+            onChangeText={setTestimonial}
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
+            placeholderTextColor="#9CA3AF"
+          />
+          <Text style={styles.characterCount}>{testimonial.length}/500</Text>
+        </View>
+
+        {/* Photos */}
+        <View style={styles.photosSection}>
+          <Text style={styles.sectionTitle}>Photos (optionnel)</Text>
+          <Text style={styles.sectionSubtitle}>
+            Ajoutez des photos de vos résultats ou de votre progression
+          </Text>
+          
+          <View style={styles.photosGrid}>
+            {selectedImages.map((image, index) => (
+              <View key={index} style={styles.photoContainer}>
+                <Image source={{ uri: image }} style={styles.selectedPhoto} />
+                <TouchableOpacity
+                  style={styles.removePhotoButton}
+                  onPress={() => handleRemovePhoto(index)}
+                >
+                  <Text style={styles.removePhotoText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+            
+            {selectedImages.length < 3 && (
+              <TouchableOpacity style={styles.addPhotoButton} onPress={handleAddPhoto}>
+                <Camera size={24} color="#EC5300" />
+                <Text style={styles.addPhotoText}>Ajouter une photo</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Guidelines */}
+        <View style={styles.guidelinesSection}>
+          <Text style={styles.guidelinesTitle}>💡 Conseils pour un bon témoignage</Text>
+          <Text style={styles.guidelinesText}>
+            • Soyez honnête et authentique{'\n'}
+            • Mentionnez vos résultats concrets{'\n'}
+            • Parlez de ce qui vous a le plus aidé{'\n'}
+            • Encouragez les autres membres{'\n'}
+            • Respectez la vie privée des autres
+          </Text>
+        </View>
+      </ScrollView>
+
+      {/* Submit Button */}
+      <View style={styles.bottomSection}>
+        <TouchableOpacity
+          style={[styles.submitButton, (!rating || !testimonial.trim()) && styles.submitButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={!rating || !testimonial.trim() || isSubmitting}
+        >
+          <LinearGradient
+            colors={(!rating || !testimonial.trim()) ? ['#9CA3AF', '#9CA3AF'] : ['#EC5300', '#FF6B35']}
+            style={styles.submitButtonGradient}
+          >
+            <Text style={styles.submitButtonText}>
+              {isSubmitting ? 'Publication...' : 'Publier mon témoignage'}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F9FAFB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+  },
+  headerRight: {
+    width: 40,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  programSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+    marginBottom: 24,
+  },
+  programImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  programTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  programSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  ratingSection: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#6B7280',
+    marginBottom: 16,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  starButton: {
+    padding: 4,
+  },
+  ratingText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
+    color: '#EC5300',
+    textAlign: 'center',
+  },
+  testimonialSection: {
+    marginBottom: 32,
+  },
+  testimonialInput: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#111827',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    minHeight: 120,
+  },
+  characterCount: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: '#9CA3AF',
+    textAlign: 'right',
+    marginTop: 8,
+  },
+  photosSection: {
+    marginBottom: 32,
+  },
+  photosGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  photoContainer: {
+    position: 'relative',
+  },
+  selectedPhoto: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+  },
+  removePhotoButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removePhotoText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Bold',
+    color: '#FFFFFF',
+  },
+  addPhotoButton: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  addPhotoText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: '#EC5300',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  guidelinesSection: {
+    backgroundColor: '#FEF3E7',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 120,
+  },
+  guidelinesTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#EA580C',
+    marginBottom: 8,
+  },
+  guidelinesText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: '#9A3412',
+    lineHeight: 20,
+  },
+  bottomSection: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+  },
+  submitButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#FFFFFF',
+  },
+});
